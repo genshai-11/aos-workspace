@@ -19,11 +19,18 @@ Agent Operating System - shared workspace for 7 autonomous agents.
 3. GitHub Actions runs CI (lint, test, build)
 4. On merge to main → Cloud Build deploys
 
+## Project Tracking
+- GitHub Project board: https://github.com/orgs/genshai11/projects/1/views/1
+- Epic issue: https://github.com/genshai-11/aos-workspace/issues/1
+- Milestone: **AI Support Bot v1**
+- PRD (source of truth): `specs/prd-ai-support-bot-v1.md`
+
 ## Structure
 ```
 projects/       # Full applications (each has its own package.json)
 packages/       # Shared libraries and utilities
 scripts/        # Build and deployment scripts
 docs/           # Architecture decisions and research
+specs/          # PRD, API contracts, ERD, flow schemas
 .github/        # GitHub Actions workflows
 ```
