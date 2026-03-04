@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      projects: ${{ steps.changes.outputs.projects }}
+      packages: ${{ steps.changes.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            projects:
+              - 'projects/**'
+            packages:
+              - 'packages/**'
+
+  build-projects:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.projects == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Find and build changed projects
+        run: |
+          for dir in projects/*/; do
+            if [ -f "$dir/package.json" ]; then
+              echo "Building $dir..."
+              cd "$dir"
+              npm ci --if-present
+              npm run lint --if-present
+              npm test --if-present
+              npm run build --if-present
+              cd ../..
+            fi
+          done
+
+  build-packages:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.packages == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - name: Find and build changed packages
+        run: |
+          for dir in packages/*/; do
+            if [ -f "$dir/package.json" ]; then
+              echo "Building $dir..."
+              cd "$dir"
+              npm ci --if-present
+              npm test --if-present
+              npm run build --if-present
+              cd ../..
+            fi
+          done
